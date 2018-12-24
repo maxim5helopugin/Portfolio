@@ -8,3 +8,6 @@ A collection of projects/assignments I had an opportunity to be a part of during
 - Part 2 : Reflex Agents, MiniMax, Alpha-Beta Pruning, Expectimax
 - Part 3 : Value Iteration and Q-learning
 - Still working on parts 4,5,6
+
+# Minor Problems:
+- Concurrent stacks: Lock-free, Descriptor-based and Elimination-backoff based.
