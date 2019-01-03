@@ -16,4 +16,5 @@ A collection of projects/assignments I had an opportunity to be a part of during
 - Includes a test case for performance comparisons 
 
 # Minor Problems:
-- Concurrent stacks: Lock-free, Descriptor-based and Elimination-backoff based.
+- Concurrent stacks: Lock-free, Descriptor-based and Elimination-backoff based all in C++.
+- K nearest neigbour classifier on MNIST. k-fold validation for optimal k, sliding window. Python
