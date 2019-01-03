@@ -1,0 +1,16 @@
+1 	sim_vehicle.py
+
+2	ipconfig_all
+	mavproxy.py --master=udp:127.0.0.1:14550
+	output add 127.0.0.1:14551
+	output add 10.32.57.45:14550
+
+3	missionplanner wind -> flight data -> udp connect 14550
+	sudo python test1.py --connect udp:127.0.0.1:14551
+	
+
+
+------------------ROS--------------
+cd catkin_ws
+catkin_make
+. ~/catkin_ws/devel/setup.bash

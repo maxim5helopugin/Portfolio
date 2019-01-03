@@ -1,0 +1,5 @@
+#!/bin/bash
+# Start Gazebo SITL
+
+. ~/catkin_ws/devel/setup.bash
+sim_vehicle.py -v ArduCopter -j4 -f Gazebo gazebo-iris -S 100 -m --mav10 --console -I0

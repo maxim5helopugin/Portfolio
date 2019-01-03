@@ -1,0 +1,6 @@
+#!/bin/bash
+# Start Gazebo Simulation
+
+cd ~/catkin_ws/src/quad_gazebo
+. ~/catkin_ws/devel/setup.bash
+roslaunch quad_gazebo quadbuilding.launch

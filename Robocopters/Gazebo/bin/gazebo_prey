@@ -1,0 +1,5 @@
+#!/bin/bash
+# Start Gazebo Simulation
+
+cd ~/ardupilot1/Tools/autotest
+./sim_vehicle.py -v ArduCopter -f gazebo-iris --console -I1

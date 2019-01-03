@@ -1,0 +1,8 @@
+#!/bin/bash
+
+gnome-terminal -x ros_talker
+gnome-terminal -x ros_target
+gnome-terminal -x ros_listener
+gnome-terminal -x ros_tgt_control
+
+

@@ -1,0 +1,7 @@
+#!/bin/bash
+# My first script
+
+echo "RUN TALKER HERE"
+. ~/catkin_ws/devel/setup.bash
+read input
+

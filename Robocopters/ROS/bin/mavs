@@ -1,0 +1,10 @@
+#!/bin/bash
+
+gnome-terminal -x roscore
+gnome-terminal -x rinit
+gnome-terminal -x mav_connect
+
+. ~/catkin_ws/devel/setup.bash
+cd catkin_ws
+catkin_make
+

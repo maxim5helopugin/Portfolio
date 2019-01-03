@@ -1,0 +1,6 @@
+#!/bin/bash
+# Start Vision for Gazebo
+
+cd ~/catkin_ws/src/quad/scripts
+. ~/catkin_ws/devel/setup.bash
+python ros_vision.py

@@ -1,0 +1,5 @@
+#!/bin/bash
+# Start Gazebo Simulation
+
+. ~/catkin_ws/devel/setup.bash
+rosrun rviz rviz

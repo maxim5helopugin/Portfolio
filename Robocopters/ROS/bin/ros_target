@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. ~/catkin_ws/devel/setup.bash
+rosrun quad send_target 5
+

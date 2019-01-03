@@ -1,0 +1,43 @@
+Setting up Simulation for QUAD
+-------------------------------
+
+1. Install ROS Kinetic following instructions at:  
+	http://wiki.ros.org/kinetic/Installation/Ubuntu
+
+2. Install Gazebo 7 following Step-by-step instructions at: 
+	*NOTE* Change any versions of Gazebo 9 to Gazebo 7, ie Step 3:
+	$ sudo apt-get install gazebo7
+	# For developers that work on top of Gazebo, one extra package
+	$ sudo apt-get install libgazebo7-dev
+
+	http://gazebosim.org/tutorials?tut=install_ubuntu&cat=install
+
+3. Install ROS-Gazebo packages:
+	sudo apt-get install ros-kinetic-gazebo7-ros ros-kinetic-gazebo7-ros-pkgs 
+		ros-kinetic-gazebo7-ros-control
+
+4. After this make sure you run Gazebo at least once. You can run it with the following command:
+	gazebo
+
+5. Install ardupilot_gazebo plugin, i'm pretty sure i used the SwiftGust suggested by ardupilot.org
+   Just follow the instructions on the readme:
+	https://github.com/swiftgust/ardupilot_gazebo
+
+6. Install SITL, following the instructions at:
+	http://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html#setting-up-sitl-on-linux
+
+7. After installing SITL we need to clone it again for the prey drone. Run the following commands:
+	cd ~
+	git clone ​ https://github.com/ArduPilot/ardupilot.git​ ardupilot1
+	cd ardupilot
+	git submodule update --init --recursive
+	alias waf="$PWD/modules/waf/waf-light"
+
+	*NOTE* the next waf commands must be run from within the ardupilot1 folder:
+	waf configure --board=sitl
+	waf all
+
+8. Copy models into gazebo model folders
+
+
+If you have any other questions, feel free to message me on Slack! 
