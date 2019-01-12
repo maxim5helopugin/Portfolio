@@ -28,18 +28,18 @@ void doPops(Stack* stck, int size){
 }
 
 // test function, used to change the % of operations
-void operation(Stack* stack, Node* nodes[]){
-		doPushes(stack, nodes, 4000000);
-		doPops(stack, 500000);
-		for(int i = 0; i<500000; i++){
-			stack->size();
-		}
+void operation(Stack* stack, Node* nodes[], int operations){
+		doPushes(stack, nodes, operations/2);
+		doPops(stack, operations/2);
 }
 
 // test main class
-int main(){
+int main(int argc, char* argv[]){
+
 	Stack *stck = new Stack();
-	int numthreads = 2;
+	int numthreads = atoi(argv[1]);
+	int operations = atoi(argv[2]);
+
 // pre - allocate nodes and threads
 	thread threads[numthreads];
 	Node* nodes[numthreads][100];
@@ -51,7 +51,7 @@ int main(){
 // start clock when threads are ready to spawn
 	clock_t start = clock();
 	for(int i = 0; i<numthreads; i++){
-		threads[i] = thread(operation, stck, nodes[i]);
+		threads[i] = thread(operation, stck, nodes[i], operations/numthreads);
 	}
 // wait untill finished
 	for(int i = 0; i<numthreads; i++){
