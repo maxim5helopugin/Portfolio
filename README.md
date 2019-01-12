@@ -4,10 +4,10 @@ A collection of projects/assignments I had an opportunity to be a part of during
 ## Robocopters
 - A system within ROS to control a quadcopter to identify and attack prey drones
 - My contribution of the project consists of navigation subsystem:
--- The line of sight pursuit guidance is implemented in C++
--- Communications with the flight controller are done through the Python interface
--- Contains scripts for the initialization of the environment as well
--- Tested in SITL environment
+- The line of sight pursuit guidance is implemented in C++
+- Communications with the flight controller are done through the Python interface
+- Contains scripts for the initialization of the environment as well
+- Tested in SITL environment
 
 ## Pacman Berkley Project
 - Solutions to the ai.berkley pacman project. All the source code is taken directly from the ai.berkley website, and the blanks were
