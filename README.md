@@ -9,8 +9,8 @@ A collection of projects/assignments I had an opportunity to be a part of during
 - Contains scripts for the initialization of the environment as well
 - Tested in SITL environment
 
-## Pacman Berkley Project
-- Solutions to the ai.berkley pacman project. All the source code is taken directly from the ai.berkley website, and the blanks were
+## Pacman Berkeley Project
+- Solutions to the ai.berkeley pacman project. All the source code is taken directly from the ai.berkley website, and the blanks were
   filled in by me. To run a particular part, just run the autograder.py within the folder.
 - Part 1 : DFS, BFS, UCS, A* and heuristics
 - Part 2 : Reflex Agents, MiniMax, Alpha-Beta Pruning, Expectimax
