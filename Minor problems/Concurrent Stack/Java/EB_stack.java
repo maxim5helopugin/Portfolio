@@ -12,16 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 // Elimination Backoff stack
 public class EB_stack<T> { 
-	
-// Node to store info in the stack
-	public class Node {
-		public T val; 
-		public Node next; 
-// Constructor
-		public Node(T _val) { 
-			val = _val;  
-		} 
-	}
 
 // Exponential backoff class
 	public class Backoff{
@@ -156,15 +146,15 @@ public class EB_stack<T> {
 
 // Push with a single CAS, it successfull, return true
 	private boolean tryPush(Node new_head) throws Exception{ 
-		Node old_head = head.get(); 
-		new_head.next = old_head; 
+		Node<T> old_head = head.get(); 
+		new_head.set_next(old_head); 
 		return(head.compareAndSet(old_head, new_head)); 
 	} 
 
 // Keep pushing untill eliminated or pushed
 	public void push(T x) throws Exception{
 		RangePolicy rangePolicy = policy.get(); 
-		Node new_head = new Node(x); 
+		Node<T> new_head = new Node<T>(x); 
 		while (true){ 
 			if (tryPush(new_head)){
 				numOps.incrementAndGet();
@@ -184,11 +174,11 @@ public class EB_stack<T> {
 
 // Pop a single time. If successfull return the head
 	private Node tryPop() throws Exception{ 
-		Node old_head = head.get(); 
+		Node<T> old_head = head.get(); 
 		if(old_head == null){ 
 			throw new Exception(); 
 		} 
-		Node new_head = old_head.next; 
+		Node<T> new_head = old_head.get_next(); 
 		if(head.compareAndSet(old_head, new_head)){ 
 			return old_head; 
 		}else{ 
@@ -200,10 +190,10 @@ public class EB_stack<T> {
 	public T pop() throws Exception{ 
 		RangePolicy rangePolicy = policy.get();
 		while (true){ 
-			Node old_head = tryPop(); 
+			Node<T> old_head = tryPop(); 
 			if (old_head != null){
 				numOps.incrementAndGet(); 
-				return old_head.val; 
+				return old_head.get_val(); 
 			} else try{ 
 				T otherValue = eliminationArray.visit(null, rangePolicy.getRange());
 				if(otherValue != null){
