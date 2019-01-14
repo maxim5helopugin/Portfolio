@@ -13,7 +13,7 @@ run "g++ test_class.cpp -o3 -o test_class". (if you are not using c++11
 the compilation by c++11)
 This will compile the test_class with the specific deque implementation
 specified in the header. To compile it with another version, specify the 
-file inside the #include<*> and recompile again.
+file inside the "#include<*>" and recompile again.
 
 To run the compiled program, type "test_class a1 a2 a3", where 
 a1 = number of threads
