@@ -1,17 +1,19 @@
 // Node class for the stack
+template<class T>
 class Node{
 public:
-	Node(int _val);
-	int getVal(){return val;}
+	Node(T _val);
+	T getVal(){return val;}
 	void setNext(Node* new_next){next = new_next;}
 	Node* getNext(){return next;}
 private:
-	int val;
+	T val;
 	Node* next;
 };
 
 //  constructor
-Node::Node(int _val)
+template<class T>
+Node<T>::Node(T _val)
 	:val(_val),
 	next(NULL)
 	{}

@@ -1,21 +1,22 @@
 // Write descriptor for the stack
-
+template<class T>
 class WriteDescriptor{
 //expected and desired nodes
 public:
 	//are any operations pending?
 	std::atomic<bool> pending;
 
-	WriteDescriptor(Node* nd1, Node* nd2, bool progress);
-	Node** get_expected(){return &expected;}
-	Node* get_desired(){return desired;}
+	WriteDescriptor(Node<T>* nd1, Node<T>* nd2, bool progress);
+	Node<T>** get_expected(){return &expected;}
+	Node<T>* get_desired(){return desired;}
 	void completed(){pending.store(false);}
 private:
-	Node* expected;
-	Node* desired;
+	Node<T>* expected;
+	Node<T>* desired;
 };
 
-WriteDescriptor::WriteDescriptor(Node* nd1, Node* nd2, bool progress):
+template<class T>
+WriteDescriptor<T>::WriteDescriptor(Node<T>* nd1, Node<T>* nd2, bool progress):
 	expected(nd1),
 	desired(nd2)
 	{
