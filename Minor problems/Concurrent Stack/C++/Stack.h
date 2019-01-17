@@ -2,13 +2,25 @@
 // Descriptor based stack
 #include <memory>
 class Stack{
-// Get class specific descriptor and writedescr
+public:
+	Stack();
+	~Stack(){
+		delete d.load()->head.load();
+		delete d.load();
+	}
+	bool push(Node* new_head);
+	int pop();
+	int size();
+	int getNumOps(){return numOps.load();};
+
+private:
+	// Get class specific descriptor and writedescr
 	std::atomic<int> numOps;
 	std::atomic<Descriptor*> d;
 	std::shared_ptr<WriteDescriptor>wd;
+};
 
-public:
-	Stack():
+Stack::Stack():
 	numOps(0)
 	{
 		// initialize size = 0, pending operations = false, head = NULL
@@ -16,12 +28,7 @@ public:
 		d = new Descriptor(0, wd, NULL);
 	}
 
-	~Stack(){
-		delete d.load()->head.load();
-		delete d.load();
-	}
-
-	bool push(Node* new_head){
+bool Stack::push(Node* new_head){
 		while(true){
 			// Store current descriptor
 			Descriptor *temp_desc = d.load();
@@ -43,7 +50,7 @@ public:
 		}
 	}
 
-	int pop(){
+int Stack::pop(){
 		Node* current_head(NULL);
 		Node* new_head(NULL);
 
@@ -68,12 +75,7 @@ public:
 	}
 
 	// return the size of the stack
-	int size(){
+int Stack::size(){
 		numOps++;
 		return d.load()->size;
 	}
-
-	int getNumOps(){
-		return numOps.load();
-	}
-};
