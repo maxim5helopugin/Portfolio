@@ -10,7 +10,7 @@ A collection of projects/assignments I had an opportunity to be a part of during
 - Tested in SITL environment
 
 ## Pacman Berkeley Project
-- Solutions to the ai.berkeley pacman project. All the source code is taken directly from the ai.berkley website, and the blanks were
+- Solutions to the ai.berkeley pacman project. All the source code is taken directly from the ai.berkeley website, and the blanks were
   filled in by me. To run a particular part, just run the autograder.py within the folder.
 - Part 1 : DFS, BFS, UCS, A* and heuristics
 - Part 2 : Reflex Agents, MiniMax, Alpha-Beta Pruning, Expectimax
@@ -25,5 +25,5 @@ A collection of projects/assignments I had an opportunity to be a part of during
 
 ## Minor Problems:
 - Concurrent stacks: Lock-free, Descriptor-based in Java; and Elimination-backoff in C++.
-- K nearest neigbour classifier on MNIST. k-fold validation for optimal k, sliding window. Python
+- K nearest neighbor classifier on MNIST. k-fold validation for optimal k, sliding window. Python
 - SVM for glass dataset, k-fold validation, hyperparameter testing, kernel selection. Python
