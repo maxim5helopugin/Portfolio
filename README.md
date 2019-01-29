@@ -9,13 +9,21 @@ A collection of projects/assignments I had an opportunity to be a part of during
 - Contains scripts for the initialization of the environment as well
 - Tested in SITL environment
 
+## DDPG Bipedal Walker
+- A simulation of a bipedal robot within OpenAi Gym
+- The task is to finish the route by a robot without any prior knowledge of walking
+- Implemented an Actor-Critic algorithm DDPG by DeepMind with Python and PyTorch
+- Hyperparameters and operations are tuned to be optimal
+- Learning uses GPU
+- The environment is solved within ~3000 epochs
+
 ## Pacman Berkeley Project
 - Solutions to the ai.berkeley pacman project. All the source code is taken directly from the ai.berkeley website, and the blanks were
   filled in by me. To run a particular part, just run the autograder.py within the folder.
 - Part 1 : DFS, BFS, UCS, A* and heuristics
 - Part 2 : Reflex Agents, MiniMax, Alpha-Beta Pruning, Expectimax
 - Part 3 : Value Iteration and Q-learning
-- Still working on parts 4,5,6
+- Still working on parts 4,5
 
 ## Unbounded Nonblocking Dequeu
 - Unbounded Concurrent Nonblocking container written in C++
