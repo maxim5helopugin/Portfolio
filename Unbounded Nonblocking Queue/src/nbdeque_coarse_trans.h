@@ -1,80 +1,13 @@
-// Maxim Shelopugin
-// GIS deque reimplementation using coarse transactions
-// Based on the code from "An Unbounded Nonblocking Double-ended Queue"
-// by Matthew Graichen, Joseph Izraelevitz, Michael L. Scott
-// 2016 45th International Conference on Parallel Processing
-// COP 6616 Fall 2018
-
 #include <iostream>
 #include <atomic>
 #include <thread>
 #include <time.h>
+#include "Node_trans.h"
 
 using namespace std;
 
-// define important flags
-#define LN INT32_MAX	
-#define RN INT32_MIN
-#define LS INT32_MAX-1
-#define RS INT32_MIN+1
-#define SZ 100000
-
 // a slot tuple - 64 bit for idex-value pair
 typedef uint64_t slot;
-
-// Node class, stores an array of slots
-class Node{
-public:
-	int left_slot_hint;
-	int right_slot_hint;
-	slot buffer[SZ];
-
-// Create an array of slots. Populate 0 -> split with LN and split -> SZ with RN
-	Node(int split){
-		for(int i = 0; i< split; i++){
-			buffer[i] = translate(LN, 0);
-		}
-		for( int i =split; i<SZ; i++){
-			buffer[i] = translate(RN, 0);
-		}
-		left_slot_hint = split-1;
-		right_slot_hint = split;
-	}
-
-// Print nodes from leftmost to rightmost
-	void printnode(){
-		if((int)(buffer[0]>>16) == LN || (int)(buffer[0]>>16) == RN)
-			print(buffer[0]);
-		else
-			cout << " vv \n";
-		for(int i = 1; i<SZ-1; i++){
-			print(buffer[i]);
-		}
-		if((int)(buffer[SZ-1]>>16)==LN || (int)(buffer[SZ-1]>>16) == RN)
-			print(buffer[SZ-1]);
-		else{
-			cout << " vv \n";
-			((Node*)(buffer[SZ-1]>>16))->printnode();
-		}
-	}
-
-// return the reference to a specific slot
-	slot* get_slot(int i){
-		return &buffer[i];
-	}
-
-// translate index-data pair into a single slot 
-	slot translate(int data, short index){
-		slot temp = 0;
-		temp=(((temp)|data)<<16)|index;
-		return temp;
-	}
-
-// print index and data fields separately
-	void print(slot num){
-		cout << (short)num << " " << (int)(num>>16) << "\n";
-	}
-};
 
 // stores a pointer to a node and a multipurpose counter
 struct node_hint{
@@ -169,9 +102,7 @@ public:
 // Push left.
 // Get the edge index, determine the type of the edge, make the transition
 	int push_left(int o){
-// Start the atomic push_left
-		__transaction_atomic{
-
+	__transaction_atomic{
 			node_hint hint_cpy = left_node_hint;
 			node_hint temp_edge = l_oracle(hint_cpy);
 
@@ -290,7 +221,6 @@ public:
 // Push right.
 // Same logic as push left, but the indecies are mirrored
 	int push_right(int o){
-// Start the atomic push_right
 		__transaction_atomic{
 			node_hint hint_cpy = right_node_hint;
 			node_hint temp_edge = r_oracle(hint_cpy);
@@ -413,141 +343,139 @@ public:
 // Get the edge index,determine the type of the edge, perform operations
 // Returns 0 if the queue is empty
 	int pop_left(){
-// Start the atomic pop_left
-		__transaction_atomic{
-			node_hint hint_cpy = left_node_hint;
-			node_hint temp_edge = l_oracle(hint_cpy);
+			__transaction_atomic{
+				node_hint hint_cpy = left_node_hint;
+				node_hint temp_edge = l_oracle(hint_cpy);
 
-			int edge_idx = temp_edge.ct;
-			Node* edge_nd = temp_edge.buffer;
+				int edge_idx = temp_edge.ct;
+				Node* edge_nd = temp_edge.buffer;
 
-			slot* in = edge_nd->get_slot(edge_idx);
-			slot* out = edge_nd->get_slot(edge_idx-1);
+				slot* in = edge_nd->get_slot(edge_idx);
+				slot* out = edge_nd->get_slot(edge_idx-1);
 
-			slot in_cpy = *in;
-			slot out_cpy = *out;
+				slot in_cpy = *in;
+				slot out_cpy = *out;
 					
 // interior edge
 // so interior pop or empty check
-			if(edge_idx!=1){
-				slot new_out_cpy = out_cpy;
-				slot new_in_cpy = in_cpy;
-
-				new_out_cpy+=1;
-				new_in_cpy+=1;
-
-				slot temp = 0;
-				temp = (temp|LN)<<16;
-				new_out_cpy = (new_out_cpy&0x000000FF)|temp;
-				new_in_cpy = (new_in_cpy&0x000000FF)|temp;
-
-				if((int)(in_cpy>>16) == RN && *in == in_cpy){
-					return 0;
-				}
-				if(*out == out_cpy && *in==in_cpy){
-					*out = new_out_cpy;
-					*in = new_in_cpy;
-					hint_l(hint_cpy, edge_nd, edge_idx+1);
-					return (int)(in_cpy>>16);
-				}
-			}
-
-// edge is on border of array, so follow straddling
-// pop progression as necessary: seal left node,
-// remove left node, then boundary pop
-			else{
-				if((int)(out_cpy>>16) != LN){
-					Node* out_nd = (Node*)(out_cpy>>16);
-
-					slot*far;
-					far = out_nd->get_slot(SZ-2);
-
-					slot far_cpy = *far;
-	
-// ensure left neighbor points back
-					slot back = *((Node*)(out_cpy>>16))->get_slot(SZ-1);
-					slot back_cpy = back;
-				
-// check for straddled edge and seal
-					if((int)(far_cpy>>16) == LN){
-						if(((int)(in_cpy>>16) == RN || (int)(in_cpy>>16) == RS) && *in == in_cpy){
-							return 0; // empty
-						}
-
-						slot new_in_cpy = in_cpy;
-						slot new_far_cpy = far_cpy;
-						slot temp = 0;
-
-						new_in_cpy+=1;
-						new_far_cpy+=1;
-						temp = (temp|LS)<<16;
-						new_far_cpy = (new_far_cpy&0x000000FF)|temp;
-
-						if(*far == far_cpy && *in==in_cpy){
-							*far = new_far_cpy;
-							*in = new_in_cpy;
-							far_cpy = new_far_cpy;
-							in_cpy = new_in_cpy;
-						}
-					}
-// check for sealed left node and remove it 
-					if((int)(far_cpy>>16) == LS){
-						if((int)(in_cpy>>16) == RN && *in == in_cpy){
-							return 0;
-						}
-
-						slot new_in_cpy = in_cpy;
-						slot new_out_cpy = out_cpy;
-						slot temp = 0;
-
-						new_in_cpy+=1;
-						new_out_cpy+=1;
-						temp = (temp|LN)<<16;
-						new_out_cpy = (new_out_cpy&0x000000FF)|temp;
-
-						if(*out == out_cpy && *in==in_cpy){
-							*out = new_out_cpy;
-							*in = new_in_cpy;
-							hint_cpy = hint_l(hint_cpy, edge_nd, 1);
-							retire(out_nd);
-							in_cpy = new_in_cpy;
-							out_cpy = new_out_cpy;
-						}
-					}
-				}
-// check for boundary edge, then boundary pop
-				if((int)(out_cpy>>16) == LN){
-					if((int)(in_cpy>>16) == RN && *in==in_cpy){
-						return 0;
-					}
-
+				if(edge_idx!=1){
 					slot new_out_cpy = out_cpy;
 					slot new_in_cpy = in_cpy;
-					slot temp = 0;
 
 					new_out_cpy+=1;
 					new_in_cpy+=1;
 
+					slot temp = 0;
 					temp = (temp|LN)<<16;
 					new_out_cpy = (new_out_cpy&0x000000FF)|temp;
 					new_in_cpy = (new_in_cpy&0x000000FF)|temp;
 
+					if((int)(in_cpy>>16) == RN && *in == in_cpy){
+						return 0;
+					}
 					if(*out == out_cpy && *in==in_cpy){
 						*out = new_out_cpy;
 						*in = new_in_cpy;
-						hint_l(hint_cpy, edge_nd, 2);
+						hint_l(hint_cpy, edge_nd, edge_idx+1);
 						return (int)(in_cpy>>16);
 					}
 				}
-			}
-		} 
-	}
+
+// edge is on border of array, so follow straddling
+// pop progression as necessary: seal left node,
+// remove left node, then boundary pop
+				else{
+					if((int)(out_cpy>>16) != LN){
+						Node* out_nd = (Node*)(out_cpy>>16);
+
+						slot*far;
+						far = out_nd->get_slot(SZ-2);
+
+						slot far_cpy = *far;
+	
+// ensure left neighbor points back
+						slot back = *((Node*)(out_cpy>>16))->get_slot(SZ-1);
+						slot back_cpy = back;
+				
+// check for straddled edge and seal
+						if((int)(far_cpy>>16) == LN){
+							if(((int)(in_cpy>>16) == RN || (int)(in_cpy>>16) == RS) && *in == in_cpy){
+								return 0; // empty
+							}
+
+							slot new_in_cpy = in_cpy;
+							slot new_far_cpy = far_cpy;
+							slot temp = 0;
+
+							new_in_cpy+=1;
+							new_far_cpy+=1;
+							temp = (temp|LS)<<16;
+							new_far_cpy = (new_far_cpy&0x000000FF)|temp;
+
+							if(*far == far_cpy && *in==in_cpy){
+								*far = new_far_cpy;
+								*in = new_in_cpy;
+								far_cpy = new_far_cpy;
+								in_cpy = new_in_cpy;
+							}
+						}
+// check for sealed left node and remove it 
+						if((int)(far_cpy>>16) == LS){
+							if((int)(in_cpy>>16) == RN && *in == in_cpy){
+								return 0;
+							}
+
+							slot new_in_cpy = in_cpy;
+							slot new_out_cpy = out_cpy;
+							slot temp = 0;
+
+							new_in_cpy+=1;
+							new_out_cpy+=1;
+							temp = (temp|LN)<<16;
+							new_out_cpy = (new_out_cpy&0x000000FF)|temp;
+
+							if(*out == out_cpy && *in==in_cpy){
+								*out = new_out_cpy;
+								*in = new_in_cpy;
+								hint_cpy = hint_l(hint_cpy, edge_nd, 1);
+								retire(out_nd);
+								in_cpy = new_in_cpy;
+								out_cpy = new_out_cpy;
+							}
+						}
+					}
+// check for boundary edge, then boundary pop
+					if((int)(out_cpy>>16) == LN){
+						if((int)(in_cpy>>16) == RN && *in==in_cpy){
+							return 0;
+						}
+
+						slot new_out_cpy = out_cpy;
+						slot new_in_cpy = in_cpy;
+						slot temp = 0;
+
+						new_out_cpy+=1;
+						new_in_cpy+=1;
+
+						temp = (temp|LN)<<16;
+						new_out_cpy = (new_out_cpy&0x000000FF)|temp;
+						new_in_cpy = (new_in_cpy&0x000000FF)|temp;
+
+						if(*out == out_cpy && *in==in_cpy){
+							*out = new_out_cpy;
+							*in = new_in_cpy;
+							hint_l(hint_cpy, edge_nd, 2);
+							return (int)(in_cpy>>16);
+						}
+					}
+				}
+			} 
+		}
 
 // Pop right
 // Get the edge index,determine the type of the edge, perform operations
 // Returns 0 if the queue is empty
 	int pop_right(){
-// Start the atomic pop_right
 		__transaction_atomic{
 			node_hint hint_cpy = right_node_hint;
 			node_hint temp_edge = r_oracle(hint_cpy);
